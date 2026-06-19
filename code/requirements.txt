@@ -1,0 +1,14 @@
+# Core data + image handling for the evidence-review pipeline
+pandas
+pillow
+
+# Configuration / secrets loading (read API keys from env / .env)
+python-dotenv
+
+# Optional VLM/LLM SDKs (contract mentions OPENAI_API_KEY / ANTHROPIC_API_KEY)
+openai
+anthropic
+
+# Dev tooling: linting and tests
+ruff
+pytest

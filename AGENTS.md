@@ -228,3 +228,17 @@ Before you respond to any user message, confirm:
 - [ ] I will preserve the entry-point contract in §6.
 
 If any box is unchecked, fix that first.
+
+---
+
+## Cursor Cloud specific instructions
+
+Durable notes for future cloud agents (the update script has already installed deps on startup).
+
+- **Language/runtime:** Python `3.12` (`python3`). Dependencies are declared in `code/requirements.txt` and installed into the **system interpreter** with `pip --break-system-packages` (the update script handles this). No virtualenv activation is needed — just run `python3`. (`python3.12-venv` is available in the snapshot if you prefer to create your own `.venv`.)
+- **Console scripts gotcha:** pip installs entry-point scripts into `~/.local/bin`, which is **not on PATH**. Always invoke dev tools as modules instead: `python3 -m ruff ...`, `python3 -m pytest ...`.
+- **Lint:** `python3 -m ruff check code/`.
+- **Tests:** `python3 -m pytest code/`. The starter ships **no tests**, so pytest exits with code `5` ("no tests collected") — that is expected, not a failure.
+- **Entry points are intentionally empty:** `code/main.py` and `code/evaluation/main.py` are empty starter stubs. Build the solution there per the contract in §6; do not assume a runnable app exists yet.
+- **This is a batch CSV→CSV pipeline, not a GUI/server.** The deliverable reads `dataset/claims.csv` (+ `user_history.csv`, `evidence_requirements.csv`, local images under `dataset/images/`) and writes `output.csv` with the exact 14-column schema in `problem_statement.md`.
+- **Secrets:** model-backed runs read `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` from the environment (never hardcode). They are **not** set in this VM; add them as Cursor secrets before running any VLM/LLM inference.
