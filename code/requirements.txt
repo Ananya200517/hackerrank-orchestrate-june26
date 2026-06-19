@@ -1,0 +1,2 @@
+# Standard library only for the pipeline skeleton.
+# Add model SDK dependencies here when integrating VLM/LLM providers.
