@@ -1,2 +1,3 @@
-# Standard library only for the pipeline skeleton.
-# Add model SDK dependencies here when integrating VLM/LLM providers.
+anthropic>=0.49.0
+openai>=1.68.0
+python-dotenv>=1.0.1
