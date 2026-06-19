@@ -16,8 +16,11 @@ from pipeline.config import (  # noqa: E402
     DEFAULT_USER_HISTORY_PATH,
     REPO_ROOT,
 )
+from pipeline.data_loader import load_claims_csv  # noqa: E402
 from pipeline.output_writer import write_output_csv  # noqa: E402
 from pipeline.processor import ClaimProcessor  # noqa: E402
+from pipeline.settings import load_settings  # noqa: E402
+from pipeline.verifier import StubClaimVerifier, VLMClaimVerifier  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -54,21 +57,58 @@ def parse_args() -> argparse.Namespace:
         default=REPO_ROOT,
         help="Repository root used to resolve image paths.",
     )
+    parser.add_argument(
+        "--provider",
+        choices=("openai", "anthropic"),
+        help="VLM provider override (defaults to DEFAULT_PROVIDER from .env).",
+    )
+    parser.add_argument(
+        "--stub",
+        action="store_true",
+        help="Use the deterministic stub verifier instead of VLM calls.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="Process only the first N claims (0 = all).",
+    )
     return parser.parse_args()
+
+
+def build_verifier(args: argparse.Namespace):
+    if args.stub:
+        return StubClaimVerifier()
+    settings = load_settings(repo_root=args.repo_root)
+    return VLMClaimVerifier(settings=settings, provider=args.provider)
 
 
 def main() -> int:
     args = parse_args()
+    verifier = build_verifier(args)
     processor = ClaimProcessor(
         user_history_path=args.user_history,
         evidence_requirements_path=args.evidence_requirements,
         repo_root=args.repo_root,
+        verifier=verifier,
     )
-    outputs = processor.process_claims_csv(args.claims)
+
+    claims = load_claims_csv(args.claims, repo_root=args.repo_root)
+    if args.limit > 0:
+        claims = claims[: args.limit]
+
+    outputs = processor.process_claims(claims)
     write_output_csv(outputs, args.output)
     print(f"Processed {len(outputs)} claims -> {args.output}")
+
+    if hasattr(verifier, "usage"):
+        usage = verifier.usage
+        print(
+            "VLM usage:",
+            f"requests={usage.requests}",
+            f"images={usage.images_processed}",
+            f"input_tokens={usage.input_tokens}",
+            f"output_tokens={usage.output_tokens}",
+            f"errors={usage.errors}",
+        )
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

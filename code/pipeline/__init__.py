@@ -3,6 +3,7 @@
 from pipeline.models import ClaimInput, ClaimOutput, EvidenceRequirement, UserHistory
 from pipeline.processor import ClaimProcessor
 from pipeline.settings import Settings, load_settings
+from pipeline.verifier import StubClaimVerifier, VLMClaimVerifier
 
 __all__ = [
     "ClaimInput",
@@ -10,6 +11,8 @@ __all__ = [
     "ClaimProcessor",
     "EvidenceRequirement",
     "Settings",
+    "StubClaimVerifier",
     "UserHistory",
+    "VLMClaimVerifier",
     "load_settings",
 ]

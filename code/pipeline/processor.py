@@ -15,7 +15,7 @@ from pipeline.data_loader import (
 from pipeline.evidence import requirements_for_claim
 from pipeline.models import ClaimContext, ClaimInput, ClaimOutput
 from pipeline.user_history import lookup_user_history, merge_history_risk_flags
-from pipeline.verifier import ClaimVerifier
+from pipeline.verifier import StubClaimVerifier, VLMClaimVerifier
 
 
 class ClaimProcessor:
@@ -31,7 +31,7 @@ class ClaimProcessor:
         self.evidence_requirements = load_evidence_requirements_csv(
             evidence_requirements_path
         )
-        self.verifier = verifier or ClaimVerifier()
+        self.verifier = verifier or VLMClaimVerifier()
 
     def build_context(self, claim: ClaimInput) -> ClaimContext:
         return ClaimContext(

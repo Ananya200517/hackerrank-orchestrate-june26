@@ -17,7 +17,10 @@ code/
 │   ├── data_loader.py          # CSV + image path parsing
 │   ├── evidence.py             # Evidence requirement lookup
 │   ├── user_history.py         # User history lookup + risk flag merge
-│   ├── verifier.py             # Placeholder verifier (replace with VLM/LLM)
+│   ├── prompts.py              # VLM system/user prompts + JSON parsing
+│   ├── vlm_client.py           # OpenAI / Anthropic vision API clients
+│   ├── image_utils.py          # Base64 image encoding
+│   ├── verifier.py             # VLMClaimVerifier + StubClaimVerifier
 │   ├── processor.py            # Orchestrates claim processing
 │   └── output_writer.py        # Writes output.csv with required columns
 └── evaluation/
@@ -95,42 +98,60 @@ python code/scripts/check_setup.py --provider anthropic
 From the repository root:
 
 ```bash
-python code/main.py
+python3 code/main.py
 ```
 
-Optional flags:
+Use the stub verifier (no API calls):
 
 ```bash
-python code/main.py \
-  --claims dataset/claims.csv \
-  --output output.csv \
-  --user-history dataset/user_history.csv \
-  --evidence-requirements dataset/evidence_requirements.csv
+python3 code/main.py --stub
+```
+
+Use a specific provider:
+
+```bash
+python3 code/main.py --provider openai
+python3 code/main.py --provider anthropic
+```
+
+Process only the first N rows while iterating:
+
+```bash
+python3 code/main.py --limit 5
 ```
 
 ## Evaluate on sample claims
 
 ```bash
-python code/evaluation/main.py
+python3 code/evaluation/main.py
+python3 code/evaluation/main.py --limit 5
+python3 code/evaluation/main.py --provider anthropic
+python3 code/evaluation/main.py --stub
 ```
 
-The skeleton verifier returns placeholder predictions, so accuracy will be low until visual analysis is implemented.
+## VLM verifier
 
-## Using settings in your verifier
+`VLMClaimVerifier` sends each claim's images, conversation, evidence requirements, and user history to a vision model and parses a structured JSON decision.
 
-```python
-from pipeline.settings import load_settings
+Flow:
 
-settings = load_settings()
-api_key = settings.api_key_for_provider(settings.default_provider)
-model = settings.model_for_provider(settings.default_provider)
+```text
+ClaimContext -> prompts.py -> vlm_client.py -> parse JSON -> ClaimOutput
 ```
+
+The processor still merges `user_history` risk flags after the model response.
+
+Key files:
+
+- `pipeline/verifier.py` — retry logic and fallback output on API failure
+- `pipeline/prompts.py` — system prompt with allowed enums + JSON schema
+- `pipeline/vlm_client.py` — OpenAI and Anthropic vision calls + usage stats
 
 ## Next steps
 
-1. Replace `ClaimVerifier` in `pipeline/verifier.py` with a VLM/LLM-backed implementation.
-2. Use `ClaimContext.evidence_requirements` and `ClaimContext.user_history` in prompts and rule layers.
-3. Expand `evaluation/` with strategy comparison and `evaluation_report.md`.
+1. Tune prompts and compare at least two strategies/models in `evaluation/`.
+2. Write `evaluation/evaluation_report.md` with metrics, cost, and latency.
+3. Run full `dataset/claims.csv` and produce final `output.csv`.
 
 ## Secrets
 
