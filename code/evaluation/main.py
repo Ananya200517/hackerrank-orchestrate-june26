@@ -68,6 +68,11 @@ def parse_args() -> argparse.Namespace:
         default=0,
         help="Evaluate only the first N sample rows (0 = all).",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print per-row field mismatches against expected labels.",
+    )
     return parser.parse_args()
 
 
@@ -82,6 +87,33 @@ def compare_field(field: str, expected: str, predicted: str) -> bool:
     return expected == predicted
 
 
+SCOREABLE_FIELDS = [
+    column
+    for column in OUTPUT_COLUMNS
+    if column not in {"user_id", "image_paths", "user_claim", "claim_object"}
+]
+
+
+def print_mismatches(
+    expected_rows: list[dict[str, str]],
+    predicted_rows: list[dict[str, str]],
+) -> None:
+    for index, (expected, predicted) in enumerate(
+        zip(expected_rows, predicted_rows, strict=True), start=1
+    ):
+        mismatches = [
+            field
+            for field in SCOREABLE_FIELDS
+            if not compare_field(field, expected[field], predicted[field])
+        ]
+        if not mismatches:
+            continue
+        print(f"\nRow {index} ({expected['user_id']}): {', '.join(mismatches)}")
+        for field in mismatches:
+            print(f"  {field}: expected={expected[field]!r}")
+            print(f"  {field}: predicted={predicted[field]!r}")
+
+
 def evaluate(
     expected_rows: list[dict[str, str]],
     predicted_rows: list[dict[str, str]],
@@ -91,11 +123,7 @@ def evaluate(
             f"Row count mismatch: expected {len(expected_rows)}, got {len(predicted_rows)}"
         )
 
-    scoreable_fields = [
-        column
-        for column in OUTPUT_COLUMNS
-        if column not in {"user_id", "image_paths", "user_claim", "claim_object"}
-    ]
+    scoreable_fields = SCOREABLE_FIELDS
     field_correct: Counter[str] = Counter()
     exact_match_rows = 0
 
@@ -147,6 +175,9 @@ def main() -> int:
     predicted = processor.process_claims(sample_claims)
     predicted_rows = [output.to_row() for output in predicted]
     metrics = evaluate(expected_rows, predicted_rows)
+
+    if args.verbose:
+        print_mismatches(expected_rows, predicted_rows)
 
     label = "stub baseline" if args.stub else f"vlm ({verifier.provider})"
     print(f"Evaluation summary ({label})")

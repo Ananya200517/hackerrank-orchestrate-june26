@@ -78,7 +78,7 @@ class VLMClient:
             ],
             response_format={"type": "json_object"},
             temperature=0,
-            max_tokens=1200,
+            max_tokens=1500,
         )
         self.usage.requests += 1
         if response.usage is not None:
@@ -117,7 +117,7 @@ class VLMClient:
             system=system_prompt,
             messages=[{"role": "user", "content": content}],
             temperature=0,
-            max_tokens=1200,
+            max_tokens=1500,
         )
         self.usage.requests += 1
         self.usage.input_tokens += response.usage.input_tokens

@@ -4,6 +4,11 @@ import time
 
 from pipeline.models import ClaimContext, ClaimOutput
 from pipeline.prompts import parse_verification_response
+from pipeline.response_postprocess import (
+    add_manual_review_for_high_risk_flags,
+    normalize_categorical_fields,
+    strip_history_risk_flags,
+)
 from pipeline.settings import Settings, load_settings
 from pipeline.vlm_client import VLMClient, VLMUsageStats
 
@@ -88,7 +93,10 @@ class VLMClaimVerifier:
         for attempt in range(attempts):
             try:
                 raw_response = self.client.analyze_claim(context)
-                return parse_verification_response(raw_response, context)
+                output = parse_verification_response(raw_response, context)
+                output = strip_history_risk_flags(output, context.user_history)
+                output = add_manual_review_for_high_risk_flags(output)
+                return normalize_categorical_fields(output, context)
             except Exception as exc:  # noqa: BLE001 - retry on provider/parse failures
                 last_error = exc
                 self.usage.errors += 1

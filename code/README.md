@@ -136,16 +136,26 @@ python3 code/evaluation/main.py --stub
 Flow:
 
 ```text
-ClaimContext -> prompts.py -> vlm_client.py -> parse JSON -> ClaimOutput
+ClaimContext -> prompts.py -> vlm_client.py -> parse JSON -> post-process -> ClaimOutput
 ```
 
 The processor still merges `user_history` risk flags after the model response.
 
 Key files:
 
-- `pipeline/verifier.py` — retry logic and fallback output on API failure
-- `pipeline/prompts.py` — system prompt with allowed enums + JSON schema
+- `pipeline/prompts.py` — system prompt with step-by-step decision rubric
+- `pipeline/response_postprocess.py` — enum normalizations and risk-flag cleanup
 - `pipeline/vlm_client.py` — OpenAI and Anthropic vision calls + usage stats
+- `evaluation/prompt_tuning_report.md` — baseline vs tuned accuracy notes
+
+### Prompt tuning workflow
+
+```bash
+python3 code/evaluation/main.py --verbose
+python3 code/evaluation/main.py --limit 5 --verbose
+```
+
+Edit `pipeline/prompts.py` and re-run evaluation to compare field accuracy.
 
 ## Next steps
 
