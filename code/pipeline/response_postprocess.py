@@ -46,12 +46,29 @@ def normalize_categorical_fields(output: ClaimOutput, context: ClaimContext) -> 
             output.issue_type = "stain"
 
     if claim.claim_object == "car" and output.object_part == "side_mirror":
-        if output.issue_type in {"crack", "scratch"}:
+        if output.issue_type in {"crack", "scratch", "glass_shatter"}:
             output.issue_type = "broken_part"
+
+    if claim.claim_object == "car" and output.object_part == "windshield":
+        if output.issue_type == "glass_shatter":
+            output.issue_type = "crack"
 
     if claim.claim_object == "laptop" and output.object_part == "screen":
         if output.issue_type == "glass_shatter":
             output.issue_type = "crack"
+
+    if output.claim_status == "supported" and output.severity == "high":
+        if not any(
+            word in claim.user_claim.lower()
+            for word in ("severe", "badly", "shattered", "pretty bad", "major")
+        ):
+            output.severity = "medium"
+
+    if output.claim_status == "supported" and output.severity == "unknown":
+        if output.issue_type in {"dent", "crack", "broken_part", "water_damage", "crushed_packaging", "torn_packaging"}:
+            output.severity = "medium"
+        elif output.issue_type == "scratch":
+            output.severity = "low"
 
     if (
         claim.claim_object == "package"

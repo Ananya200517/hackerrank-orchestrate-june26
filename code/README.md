@@ -120,14 +120,15 @@ Process only the first N rows while iterating:
 python3 code/main.py --limit 5
 ```
 
-## Evaluate on sample claims
+## Evaluation
 
 ```bash
 python3 code/evaluation/main.py
-python3 code/evaluation/main.py --limit 5
-python3 code/evaluation/main.py --provider anthropic
-python3 code/evaluation/main.py --stub
+python3 code/evaluation/main.py --verbose
+python3 code/evaluation/compare_strategies.py
 ```
+
+See `evaluation/evaluation_report.md` for strategy comparison, metrics, and operational analysis.
 
 ## VLM verifier
 
@@ -158,13 +159,13 @@ python3 code/evaluation/main.py --verbose
 python3 code/evaluation/main.py --limit 5 --verbose
 ```
 
-Edit `pipeline/prompts.py` and re-run evaluation to compare field accuracy.
+Edit `pipeline/perception.py` and `pipeline/adjudicator.py`, then re-run evaluation.
 
-## Next steps
+## Submission artifacts
 
-1. Tune prompts and compare at least two strategies/models in `evaluation/`.
-2. Write `evaluation/evaluation_report.md` with metrics, cost, and latency.
-3. Run full `dataset/claims.csv` and produce final `output.csv`.
+- `output.csv` — run `python3 code/main.py`
+- `code.zip` — `zip -r code.zip code -x "*/__pycache__/*" "*.pyc"`
+- `evaluation/evaluation_report.md` — metrics and operational analysis
 
 ## Secrets
 
