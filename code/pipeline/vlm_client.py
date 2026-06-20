@@ -7,6 +7,7 @@ from openai import OpenAI
 
 from pipeline.image_utils import encode_image_base64
 from pipeline.models import ClaimContext, ImageReference
+from pipeline.perception import build_perception_system_prompt, build_perception_user_prompt
 from pipeline.prompts import build_system_prompt, build_user_prompt
 from pipeline.settings import Settings
 
@@ -47,6 +48,14 @@ class VLMClient:
     def analyze_claim(self, context: ClaimContext) -> str:
         system_prompt = build_system_prompt(context)
         user_prompt = build_user_prompt(context)
+
+        if self.provider == "openai":
+            return self._analyze_openai(system_prompt, user_prompt, context.claim.images)
+        return self._analyze_anthropic(system_prompt, user_prompt, context.claim.images)
+
+    def analyze_perception(self, context: ClaimContext) -> str:
+        system_prompt = build_perception_system_prompt(context)
+        user_prompt = build_perception_user_prompt(context)
 
         if self.provider == "openai":
             return self._analyze_openai(system_prompt, user_prompt, context.claim.images)

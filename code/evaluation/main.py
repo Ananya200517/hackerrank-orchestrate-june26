@@ -199,7 +199,7 @@ def main() -> int:
             f"errors={usage.errors}",
         )
 
-    return 0
+    return 0 if metrics["exact_match_rows"] == metrics["total_rows"] else 1
 
 
 if __name__ == "__main__":

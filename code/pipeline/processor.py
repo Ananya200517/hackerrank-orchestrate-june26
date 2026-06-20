@@ -15,6 +15,7 @@ from pipeline.data_loader import (
 from pipeline.evidence import requirements_for_claim
 from pipeline.models import ClaimContext, ClaimInput, ClaimOutput
 from pipeline.user_history import lookup_user_history, merge_history_risk_flags
+from pipeline.risk_flags import sort_risk_flags
 from pipeline.verifier import StubClaimVerifier, VLMClaimVerifier
 
 
@@ -49,7 +50,11 @@ class ClaimProcessor:
         history_flags = merge_history_risk_flags([], context.user_history)
         if history_flags:
             existing = [] if output.risk_flags == "none" else output.risk_flags.split(";")
-            output.risk_flags = ";".join(merge_history_risk_flags(existing, context.user_history))
+            output.risk_flags = sort_risk_flags(
+                ";".join(merge_history_risk_flags(existing, context.user_history))
+            )
+        else:
+            output.risk_flags = sort_risk_flags(output.risk_flags)
 
         return output
 

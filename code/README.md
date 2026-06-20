@@ -131,22 +131,25 @@ python3 code/evaluation/main.py --stub
 
 ## VLM verifier
 
-`VLMClaimVerifier` sends each claim's images, conversation, evidence requirements, and user history to a vision model and parses a structured JSON decision.
+The verifier works like a service-desk reviewer:
+
+1. **Perception (Anthropic vision)** — inspect each photo and report factual observations (`pipeline/perception.py`)
+2. **Adjudication (human rules)** — apply service-sector decision logic and standard response wording (`pipeline/adjudicator.py`)
+
+Default provider is **Anthropic** (`claude-sonnet-4-6`). Images are normalized to JPEG before upload.
 
 Flow:
 
 ```text
-ClaimContext -> prompts.py -> vlm_client.py -> parse JSON -> post-process -> ClaimOutput
+ClaimContext -> Anthropic perception -> adjudicator rules -> ClaimOutput -> history flag merge
 ```
-
-The processor still merges `user_history` risk flags after the model response.
 
 Key files:
 
-- `pipeline/prompts.py` — system prompt with step-by-step decision rubric
-- `pipeline/response_postprocess.py` — enum normalizations and risk-flag cleanup
-- `pipeline/vlm_client.py` — OpenAI and Anthropic vision calls + usage stats
-- `evaluation/prompt_tuning_report.md` — baseline vs tuned accuracy notes
+- `pipeline/perception.py` — factual image inspection prompt
+- `pipeline/adjudicator.py` — human-like claim decisions and justifications
+- `pipeline/vlm_client.py` — Anthropic / OpenAI vision clients
+- `pipeline/risk_flags.py` — canonical risk-flag ordering
 
 ### Prompt tuning workflow
 

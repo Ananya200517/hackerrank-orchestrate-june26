@@ -1,27 +1,17 @@
 from __future__ import annotations
 
 import base64
-import mimetypes
+import io
 from pathlib import Path
 
-MIME_BY_SUFFIX = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".webp": "image/webp",
-    ".gif": "image/gif",
-}
-
-
-def guess_mime_type(path: Path) -> str:
-    suffix = path.suffix.lower()
-    if suffix in MIME_BY_SUFFIX:
-        return MIME_BY_SUFFIX[suffix]
-    guessed, _ = mimetypes.guess_type(path.name)
-    return guessed or "image/jpeg"
+from PIL import Image
 
 
 def encode_image_base64(path: Path) -> tuple[str, str]:
-    mime_type = guess_mime_type(path)
-    data = base64.standard_b64encode(path.read_bytes()).decode("ascii")
-    return mime_type, data
+    """Normalize all images to JPEG for reliable VLM provider support."""
+    with Image.open(path) as img:
+        rgb = img.convert("RGB")
+        buffer = io.BytesIO()
+        rgb.save(buffer, format="JPEG", quality=92)
+        payload = buffer.getvalue()
+    return "image/jpeg", base64.standard_b64encode(payload).decode("ascii")

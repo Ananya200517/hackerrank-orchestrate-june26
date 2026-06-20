@@ -81,7 +81,7 @@ def _read_int(name: str, default: int) -> int:
 def load_settings(repo_root: Path = REPO_ROOT) -> Settings:
     load_env(repo_root=repo_root)
 
-    default_provider = os.getenv("DEFAULT_PROVIDER", "openai").strip().lower()
+    default_provider = os.getenv("DEFAULT_PROVIDER", "anthropic").strip().lower()
     if default_provider not in SUPPORTED_PROVIDERS:
         raise ValueError(
             f"DEFAULT_PROVIDER must be one of {SUPPORTED_PROVIDERS}, got '{default_provider}'."
@@ -92,7 +92,7 @@ def load_settings(repo_root: Path = REPO_ROOT) -> Settings:
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
         default_provider=default_provider,
         openai_model=os.getenv("OPENAI_MODEL", "gpt-4o"),
-        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
+        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
         request_timeout_seconds=_read_float("REQUEST_TIMEOUT_SECONDS", 120.0),
         max_retries=_read_int("MAX_RETRIES", 2),
     )
