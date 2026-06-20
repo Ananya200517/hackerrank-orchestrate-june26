@@ -6,7 +6,7 @@ Python pipeline skeleton for the HackerRank Orchestrate June 2026 challenge.
 
 ```text
 code/
-├── main.py                     # Process dataset/claims.csv -> output.csv
+├── main.py                     # Process dataset/claims.csv -> dataset/output.csv
 ├── requirements.txt            # Python dependencies
 ├── scripts/
 │   └── check_setup.py          # Verify deps + API keys
@@ -163,7 +163,7 @@ Edit `pipeline/perception.py` and `pipeline/adjudicator.py`, then re-run evaluat
 
 ## Submission artifacts
 
-- `output.csv` — run `python3 code/main.py`
+- `dataset/output.csv` — run `python3 code/main.py`
 - `code.zip` — `zip -r code.zip code -x "*/__pycache__/*" "*.pyc"`
 - `evaluation/evaluation_report.md` — metrics and operational analysis
 

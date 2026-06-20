@@ -5,7 +5,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 DEFAULT_CLAIMS_PATH = REPO_ROOT / "dataset" / "claims.csv"
-DEFAULT_OUTPUT_PATH = REPO_ROOT / "output.csv"
+DEFAULT_OUTPUT_PATH = REPO_ROOT / "dataset" / "output.csv"
 DEFAULT_USER_HISTORY_PATH = REPO_ROOT / "dataset" / "user_history.csv"
 DEFAULT_EVIDENCE_REQUIREMENTS_PATH = REPO_ROOT / "dataset" / "evidence_requirements.csv"
 DEFAULT_SAMPLE_CLAIMS_PATH = REPO_ROOT / "dataset" / "sample_claims.csv"
